@@ -4,22 +4,22 @@
 
 typedef struct
 {
-	void* detector;
-	char* error_message;
+    void* detector;
+    char* error_message;
 } detector_init_result;
 
 typedef struct
 {
-	detection* detections;
-	int detections_count;
-	char* error_message;
+    detection* detections;
+    int detections_count;
+    char* error_message;
 } detector_detect_result;
 
 typedef struct
 {
-	batch_detection* detections;
-	int detections_count;
-	char* error_message;
+    batch_detection* detections;
+    int detections_count;
+    char* error_message;
 } detector_batch_detect_result;
 
 #ifdef __cplusplus

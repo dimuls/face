@@ -17,23 +17,23 @@ using DetectorNet = dlib::loss_mmod<dlib::con<1,9,9,1,1,rcon5<rcon5<rcon5<downsa
 class Detector {
 
 public:
-	Detector(const char* model_path) {
-		dlib::deserialize(model_path) >> net;
-	}
+    Detector(const char* model_path) {
+        dlib::deserialize(model_path) >> net;
+    }
 
-	auto detect(const dlib::matrix<dlib::rgb_pixel>& image) {
+    auto detect(const dlib::matrix<dlib::rgb_pixel>& image) {
         std::lock_guard<std::mutex> lock(net_mutex);
         return net(image);
-	}
+    }
 
-	auto detect(const std::vector<dlib::matrix<dlib::rgb_pixel>>& images) {
+    auto detect(const std::vector<dlib::matrix<dlib::rgb_pixel>>& images) {
         std::lock_guard<std::mutex> lock(net_mutex);
         return net(images);
     }
 
 private:
-	DetectorNet net;
-	std::mutex net_mutex;
+    DetectorNet net;
+    std::mutex net_mutex;
 };
 
 
@@ -41,16 +41,16 @@ private:
 detector_init_result* detector_init(char* model_file_path) {
     detector_init_result* result = (detector_init_result*)malloc(sizeof(detector_init_result));
 
-	try {
-		Detector* detector = new Detector(model_file_path);
-		result->detector = (void*)detector;
-		result->error_message = NULL;
-	} catch (std::exception& e) {
-	    result->detector = NULL;
-		result->error_message = strdup(e.what());
-	}
+    try {
+        Detector* detector = new Detector(model_file_path);
+        result->detector = (void*)detector;
+        result->error_message = NULL;
+    } catch (std::exception& e) {
+        result->detector = NULL;
+        result->error_message = strdup(e.what());
+    }
 
-	return result;
+    return result;
 }
 
 void detector_free(void* detector) {
@@ -60,10 +60,10 @@ void detector_free(void* detector) {
 detector_detect_result* detector_detect(void* detector, void* image) {
     detector_detect_result* result = (detector_detect_result*)malloc(sizeof(detector_detect_result));
 
-	try {
+    try {
         dlib::matrix<dlib::rgb_pixel> dlib_image;
 
-	    cv::Mat* opencv_image = (cv::Mat*)image;
+        cv::Mat* opencv_image = (cv::Mat*)image;
 
         if (opencv_image->channels() > 1) {
             dlib::assign_image(dlib_image, dlib::cv_image<dlib::bgr_pixel>(*opencv_image));
@@ -87,10 +87,10 @@ detector_detect_result* detector_detect(void* detector, void* image) {
         result->detections = detections;
         result->error_message = NULL;
 
-	} catch (std::exception& e) {
-	    result->detections_count = 0;
-	    result->detections = NULL;
-		result->error_message = strdup(e.what());
+    } catch (std::exception& e) {
+        result->detections_count = 0;
+        result->detections = NULL;
+        result->error_message = strdup(e.what());
     }
 
     return result;

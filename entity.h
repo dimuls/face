@@ -11,7 +11,7 @@ typedef struct {
 } rectangle;
 
 typedef struct {
-	rectangle region;
+    rectangle region;
     double confidence;
 } detection;
 

@@ -49,16 +49,16 @@ static std::vector<dlib::matrix<dlib::rgb_pixel>> jitter_image(const dlib::matri
 class Recognizer {
 
 public:
-	Recognizer(const char* shaper_model_file_path, const char* recognizer_model_file_path) {
-	    dlib::deserialize(shaper_model_file_path) >> shaper;
-		dlib::deserialize(recognizer_model_file_path) >> net;
-	}
+    Recognizer(const char* shaper_model_file_path, const char* recognizer_model_file_path) {
+        dlib::deserialize(shaper_model_file_path) >> shaper;
+        dlib::deserialize(recognizer_model_file_path) >> net;
+    }
 
-	dlib::matrix<float,0,1> recognize(const dlib::matrix<dlib::rgb_pixel>& image, dlib::rectangle face_location, double padding, int jittering) {
-		auto shape = shaper(image, face_location);
+    dlib::matrix<float,0,1> recognize(const dlib::matrix<dlib::rgb_pixel>& image, dlib::rectangle face_location, double padding, int jittering) {
+        auto shape = shaper(image, face_location);
 
-		dlib::matrix<dlib::rgb_pixel> chip;
-		dlib::extract_image_chip(image, dlib::get_face_chip_details(shape, IMAGE_SIZE, padding), chip);
+        dlib::matrix<dlib::rgb_pixel> chip;
+        dlib::extract_image_chip(image, dlib::get_face_chip_details(shape, IMAGE_SIZE, padding), chip);
 
         dlib::matrix<float,0,1> descriptor;
 
@@ -76,29 +76,29 @@ public:
         }
 
         return descriptor;
-	}
+    }
 
 private:
     dlib::shape_predictor shaper;
 
-	RecognizerNet net;
-	std::mutex net_mutex;
+    RecognizerNet net;
+    std::mutex net_mutex;
 };
 
 
 recognizer_init_result* recognizer_init(char* shaper_model_file_path, char* recognizer_model_file_path) {
-	recognizer_init_result* result = (recognizer_init_result*)malloc(sizeof(recognizer_init_result));
+    recognizer_init_result* result = (recognizer_init_result*)malloc(sizeof(recognizer_init_result));
 
-	try {
-		Recognizer* recognizer = new Recognizer(shaper_model_file_path, recognizer_model_file_path);
-		result->recognizer = (void*)recognizer;
-		result->error_message = NULL;
-	} catch (std::exception& e) {
-	    result->recognizer = NULL;
-		result->error_message = strdup(e.what());
-	}
+    try {
+        Recognizer* recognizer = new Recognizer(shaper_model_file_path, recognizer_model_file_path);
+        result->recognizer = (void*)recognizer;
+        result->error_message = NULL;
+    } catch (std::exception& e) {
+        result->recognizer = NULL;
+        result->error_message = strdup(e.what());
+    }
 
-	return result;
+    return result;
 }
 
 void recognizer_free(void* recognizer) {
@@ -108,7 +108,7 @@ void recognizer_free(void* recognizer) {
 recognizer_recognize_result* recognizer_recognize(void* recognizer, void* image, rectangle* face_location, double padding, int jittering) {
     recognizer_recognize_result* result = (recognizer_recognize_result*)malloc(sizeof(recognizer_recognize_result));
 
-	try {
+    try {
         dlib::matrix<dlib::rgb_pixel> dlib_image;
 
         cv::Mat* opencv_image = (cv::Mat*)image;
@@ -137,11 +137,11 @@ recognizer_recognize_result* recognizer_recognize(void* recognizer, void* image,
         result->descriptor = descriptor;
         result->error_message = NULL;
 
-	} catch (std::exception& e) {
-	    result->descriptor = NULL;
-		result->error_message = strdup(e.what());
-		return result;
+    } catch (std::exception& e) {
+        result->descriptor = NULL;
+        result->error_message = strdup(e.what());
+        return result;
     }
 
-	return result;
+    return result;
 }

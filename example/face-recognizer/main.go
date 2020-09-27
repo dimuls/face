@@ -18,12 +18,12 @@ import (
 // https://github.com/davisking/dlib-models.
 const modelsPath = "./models"
 
-// Путь до папки с персонами. Папка должна содержать на первом уровне папки, где назавнаие папки ― имя персоны,
-// а втором уровне ― файлы с фотографиями лица соответствующей персоны.
+// Путь до папки с персонами. Папка должна содержать на первом уровне папки, где название папки ― имя персоны,
+// а на втором уровне ― файлы с фотографиями лица соответствующей персоны.
 const personsPath = "./persons"
 
-// ID оборудования для получения видепотока. В нашем случае 0 ― это ID стандрантной веб-камеры.
-const deviceID = 4
+// ID оборудования для получения видеопотока. В нашем случае 0 ― это ID стандартной веб-камеры.
+const deviceID = 0
 
 // Параметры векторизации, которые влияют на качество получаемого вектора:
 const (
@@ -87,7 +87,7 @@ func main() {
 	defer frame.Close()
 
 	for {
-		// Ждём 1 милисекунду нажатия клавиши на клавиатуре.
+		// Ждём 1 миллисекунду нажатия клавиши на клавиатуре.
 		// Если нажата Esc, то выходим из приложения.
 		if window.WaitKey(1) == 27 {
 			return
@@ -185,7 +185,8 @@ func loadPersons(detector *face.Detector, recognizer *face.Recognizer, personsPa
 
 		// Формируем персону.
 		person := Person{
-			Name: personDir.Name(), // Имя персоны ― название папки
+			// Имя персоны ― название папки.
+			Name: personDir.Name(),
 		}
 
 		// Читаем директорию персоны.
@@ -203,7 +204,7 @@ func loadPersons(detector *face.Detector, recognizer *face.Recognizer, personsPa
 
 			filePath := path.Join(personsPath, personDir.Name(), personFile.Name())
 
-			// Читаем и декодируем изображение
+			// Читаем и декодируем изображение.
 			img := gocv.IMRead(filePath, gocv.IMReadUnchanged)
 
 			// Если не удалось прочитать файл и декодировать изображение, то пропускаем файл.
@@ -231,10 +232,14 @@ func loadPersons(detector *face.Detector, recognizer *face.Recognizer, personsPa
 			// Добавляем вектор в массив векторов персоны.
 			person.Descriptors = append(person.Descriptors, descriptor)
 
-			img.Close()
+			// Освобождаем память, выделенную под изображение.
+			err = img.Close()
+			if err != nil {
+				log.Fatalf("close image: %v", err)
+			}
 		}
 
-		// Добавляем очередную персону в массив перосн.
+		// Добавляем очередную персону в массив персон.
 		persons = append(persons, person)
 	}
 

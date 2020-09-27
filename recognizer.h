@@ -3,13 +3,13 @@
 #include "entity.h"
 
 typedef struct {
-	void* recognizer;
-	char* error_message;
+    void* recognizer;
+    char* error_message;
 } recognizer_init_result;
 
 typedef struct {
-	float* descriptor;
-	char* error_message;
+    float* descriptor;
+    char* error_message;
 } recognizer_recognize_result;
 
 #ifdef __cplusplus
