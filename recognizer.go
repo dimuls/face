@@ -16,10 +16,17 @@ import (
 	"gocv.io/x/gocv"
 )
 
+// Recognizer is face recognizer. Doesn't recognize faces actually but computes
+// face descriptors which can be compared later. Utilizes dlib's face recognition
+// model and face shape predictor.
 type Recognizer struct {
 	recognizer unsafe.Pointer
 }
 
+// NewRecognizer creates new recognizer using given models. shaperModelFilePath
+// should be a path to shape_predictor_68_face_landmarks.dat file and
+// recognizerModelFilePath should be a path to dlib_face_recognition_resnet_model_v1.dat
+// file. All this files are available in https://github.com/davisking/dlib-models.
 func NewRecognizer(shaperModelFilePath, recognizerModelFilePath string) (*Recognizer, error) {
 	cShaperModelFilePath := C.CString(shaperModelFilePath)
 	defer C.free(unsafe.Pointer(cShaperModelFilePath))
@@ -38,11 +45,14 @@ func NewRecognizer(shaperModelFilePath, recognizerModelFilePath string) (*Recogn
 	return &Recognizer{recognizer: unsafe.Pointer(result.recognizer)}, nil
 }
 
+// Close frees allocated recognizer objects.
 func (r *Recognizer) Close() {
 	C.recognizer_free(r.recognizer)
 	r.recognizer = nil
 }
 
+// Recognize performs face vectorization process on given image img,
+// face location faceLocation and with given params padding and jittering.
 func (r *Recognizer) Recognize(img gocv.Mat, faceLocation image.Rectangle, padding float64, jittering int) (d Descriptor, err error) {
 	cFaceLocation := C.rectangle{}
 	cFaceLocation.min.x = C.int(faceLocation.Min.X)

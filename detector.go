@@ -16,10 +16,15 @@ import (
 	"gocv.io/x/gocv"
 )
 
+// Detector is a face detector. It utilizes dlib's CNN face detector.
+// Can detect faces on single image or on multiple images (batch detect).
 type Detector struct {
 	detector unsafe.Pointer
 }
 
+// NewDetector creates new detector using given model file path.
+// Model file path should be path to mmod_human_face_detector.dat file from
+// https://github.com/davisking/dlib-models.
 func NewDetector(modelFilePath string) (*Detector, error) {
 	cModelFilePath := C.CString(modelFilePath)
 	defer C.free(unsafe.Pointer(cModelFilePath))
@@ -35,11 +40,13 @@ func NewDetector(modelFilePath string) (*Detector, error) {
 	return &Detector{detector: unsafe.Pointer(result.detector)}, nil
 }
 
+// Close frees allocated detector object.
 func (d *Detector) Close() {
 	C.detector_free(d.detector)
 	d.detector = nil
 }
 
+// Detect takes image img and tries to detect faces on it.
 func (d *Detector) Detect(img gocv.Mat) ([]Detection, error) {
 	result := C.detector_detect(d.detector, unsafe.Pointer(img.Ptr()))
 	defer C.free(unsafe.Pointer(result))
@@ -54,6 +61,9 @@ func (d *Detector) Detect(img gocv.Mat) ([]Detection, error) {
 	return convertCDetections(result.detections, result.detections_count), nil
 }
 
+// BatchDetect takes images imgs and tries to detect faces on them.
+// Image sizes should be the same. Each array of detections from returned array
+// corresponds to input image with the same index.
 func (d *Detector) BatchDetect(imgs []gocv.Mat) ([][]Detection, error) {
 	if len(imgs) == 0 {
 		return nil, nil
